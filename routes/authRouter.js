@@ -45,6 +45,37 @@ authRouter.post("/register", isRegistered, hashPassword, (req, res) => {
   });
 });
 
+const checkUser = async (password, hash) => {
+  const match = await bcrypt.compare(password, hash);
+  console.log(match);
+  return match;
+};
 
+authRouter.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  const sql = "SELECT * FROM users WHERE email = ?";
+  db.query(sql, [email], (err, result) => {
+    if (err) {
+      return res.status(500).json("Error logging in: " + err);
+    }
+    if (result.length === 0) {
+      return res.status(400).json("User not found, please register first!");
+    }
+
+    checkUser(password, result[0].password).then((match) => {
+      if (match) {
+        res.json({
+          id: result[0].id,
+          email: result[0].email,
+          role: result[0].role,
+          msg: "Logged in successfully!",
+          status: 200,
+        });
+      } else {
+        return res.status(400).json("Wrong password!");
+      }
+    });
+  });
+});
 
 module.exports = authRouter;
