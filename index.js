@@ -9,8 +9,10 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use(express.json());
 const authRouter = require("./routes/authRouter");
+const adminRouter = require("./routes/adminRouter/adminRouter");
 const db = require("./db");
 app.use("/auth", authRouter);
+app.use("/admin", adminRouter);
 
 try {
   db.connect((err) => {
